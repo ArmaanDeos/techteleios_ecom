@@ -1,6 +1,10 @@
 import CustomForm from "@/components/common/CustomForm";
 import { loginFormController } from "@/config/config"; // Ensure this is correctly defined
+import { useToast } from "@/hooks/use-toast";
+
+import { loginUser } from "@/redux/actions/auth.actions";
 import { useState } from "react";
+import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 
 const Login = () => {
@@ -9,19 +13,58 @@ const Login = () => {
     password: "",
   };
   const [formData, setFormData] = useState(initialState);
+  const dispatch = useDispatch();
+  const { toast } = useToast();
 
-  const handleSubmit = () => {
-    // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!formData.email || !formData.password) {
+      toast({
+        title: "Oh Uhh! Something went wrong",
+        description: "All fields are required. Please fill in all fields.",
+        variant: "error",
+      });
+      return;
+    }
+
+    try {
+      const res = await loginUser(dispatch, formData);
+      console.log(res);
+
+      if (res?.success) {
+        toast({
+          title: "Success",
+          description: "Login successful. You can now continue shopping.",
+          variant: "success",
+        });
+      } else {
+        toast({
+          title: "Login Failed",
+          description: res.error.message, // Use the message from loginUser
+          variant: "error",
+        });
+      }
+    } catch (err) {
+      if (err.message) {
+        toast({
+          title: "Oh Uhh! Something went wrong",
+          description: "Invalid email or password. Please try again.",
+          variant: "error",
+          style: { background: "#f44336", color: "#fff" },
+        });
+      } else {
+        toast({
+          title: "Oh Uhh! Something went wrong",
+          description: err.message || "An error occurred. Please try again.",
+          variant: "error",
+        });
+      }
+    }
   };
 
   return (
-    <div
-      className="flex items-center justify-center min-h-screen bg-cover bg-center"
-      style={{
-        backgroundImage:
-          "url('https://static.vecteezy.com/system/resources/previews/001/227/154/large_2x/miniature-shopping-cart-in-front-of-laptop-free-photo.jpg')",
-      }}
-    >
+    <div className="flex items-center justify-center min-h-screen bg-cover bg-center">
       <div className="bg-white bg-opacity-90 rounded-lg shadow-lg p-10 w-full max-w-lg border border-gray-200">
         {/* Header */}
         <div className="text-center space-y-4">

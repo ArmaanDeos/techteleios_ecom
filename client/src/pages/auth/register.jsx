@@ -1,28 +1,66 @@
 import CustomForm from "@/components/common/CustomForm";
 import { registerFormController } from "@/config/config";
+import { useToast } from "@/hooks/use-toast";
+import { registerUser } from "@/redux/actions/auth.actions";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
 
 const Register = () => {
   const initialState = {
-    name: "",
+    username: "",
     email: "",
     password: "",
   };
   const [formData, setFormData] = useState(initialState);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
-  const handleSubmit = () => {
-    // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!formData.username || !formData.email || !formData.password) {
+      toast({
+        title: "Oh Uhh! Something went wrong",
+        description: "All fields are required. Please fill in all fields.",
+        variant: "error",
+      });
+      return;
+    }
+
+    try {
+      const response = await registerUser(dispatch, formData);
+      if (response.success) {
+        toast({
+          title: "Success",
+          description: "Registration successful. You can now log in.",
+          variant: "success",
+        });
+        navigate("/auth/login");
+      }
+    } catch (err) {
+      // Show toast error for specific cases
+      if (err.message) {
+        toast({
+          title: "Oh Uhh! Something went wrong",
+          description: "A user with this email or username already exists.",
+          variant: "error",
+          style: { border: "2px solid #f44336" },
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: err.message || "Registration failed. Please try again.",
+          variant: "error",
+          style: { border: "2px solid #f44336" },
+        });
+      }
+    }
   };
 
   return (
-    <div
-      className="flex items-center justify-center min-h-screen bg-cover bg-center"
-      style={{
-        backgroundImage:
-          "url('https://static.vecteezy.com/system/resources/previews/001/227/154/large_2x/miniature-shopping-cart-in-front-of-laptop-free-photo.jpg')",
-      }}
-    >
+    <div className="flex items-center justify-center min-h-screen bg-cover bg-center">
       <div className="bg-white bg-opacity-90 rounded-lg shadow-lg p-10 w-full max-w-lg border border-gray-200">
         {/* Header */}
         <div className="text-center space-y-4">

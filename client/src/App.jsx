@@ -15,10 +15,12 @@ import Checkout from "./pages/shop/Checkout";
 import Account from "./pages/shop/Account";
 import CheckAuth from "./components/common/CheckAuth";
 import Unauthorized from "./pages/404/unauthorized";
+import { useSelector } from "react-redux";
 
 const App = () => {
-  const isAuthenticated = false;
-  const user = null;
+  // const isAuthenticated = false;
+  // const user = null;
+  const { user, isAuthenticated } = useSelector((state) => state.auth);
   return (
     <div className="flex flex-col overflow-hidden bg-white">
       <BrowserRouter>
